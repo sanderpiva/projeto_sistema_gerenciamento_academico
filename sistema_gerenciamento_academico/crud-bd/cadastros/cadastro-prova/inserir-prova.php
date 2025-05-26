@@ -3,35 +3,36 @@
 require_once '../conexao.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $aluno_matricula = $_POST["aluno_id"];
-    $id_disciplina = $_POST["disciplina_id"];
+    $codigoProva = $_POST["codigoProva"];
+    $tipoProva = $_POST["tipo_prova"];
+    $disciplina = $_POST["disciplina"];
+    $conteudo = $_POST["conteudo"];
+    $dataProva = $_POST["data_prova"];
+    $professor = $_POST["nome_professor"];
+    $idDisciplina = $_POST["id_disciplina"];
+    $idProfessor = $_POST["id_professor"];
 
     try {
-        $sql = "INSERT INTO matricula (Aluno_id_aluno, Disciplina_id_disciplina)
-                VALUES (:aluno_matricula, :id_disciplina)";
+        $sql = "INSERT INTO prova (codigoProva, tipo_prova, disciplina, conteudo, data_prova, professor, Disciplina_id_disciplina, Disciplina_Professor_id_professor)
+                VALUES (:codigo, :tipo, :disciplina, :conteudo, :data, :professor_nome, :id_disciplina, :id_professor)";
         $stmt = $conexao->prepare($sql);
         $stmt->execute([
-            ':aluno_matricula' => $aluno_matricula,
-            ':id_disciplina' => $id_disciplina
+            ':codigo' => $codigoProva,
+            ':tipo' => $tipoProva,
+            ':disciplina' => $disciplina,
+            ':conteudo' => $conteudo,
+            ':data' => $dataProva,
+            ':professor_nome' => $professor,
+            ':id_disciplina' => $idDisciplina,
+            ':id_professor' => $idProfessor
         ]);
 
-        echo "<p>Matrícula realizada com sucesso!</p>";
+        echo "<p>Dados inseridos com sucesso!</p>";
         echo '<p><a href="../../../servicos-professor/pagina-servicos-professor.php" style="padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">Voltar ao Dashboard</a></p>';
-
     } catch (PDOException $e) {
-        $erro = $e->getMessage();
-        echo "<p>Erro ao realizar a matrícula: " . htmlspecialchars($erro) . "</p>";
-
-        if (strpos($erro, 'foreign key constraint fails') !== false) {
-            echo "<p style='color: red;'>Erro: Problema com vínculos de chave estrangeira. Verifique se a matrícula do aluno e o ID da disciplina existem.</p>";
-        } elseif (strpos($erro, "Column count doesn't match value count") !== false) {
-            echo "<p style='color: orange;'>Erro: Verifique se todos os campos necessários foram informados.</p>";
-        } else {
-            echo "<p>Erro ao inserir dados: " . htmlspecialchars($erro) . "</p>";
-        }
-        echo '<p><a href="form-matricula.php" style="padding: 10px 20px; background-color: #f44336; color: white; text-decoration: none; border-radius: 5px;">Voltar ao Cadastro</a></p>';
+        echo "<p>Erro ao inserir dados: " . $e->getMessage() . "</p>";
+        echo '<p><a href="form-prova.php" style="padding: 10px 20px; background-color: #f44336; color: white; text-decoration: none; border-radius: 5px;">Voltar ao Cadastro</a></p>';
     }
-
 } else {
     echo "<p>Requisição inválida.</p>";
 }
