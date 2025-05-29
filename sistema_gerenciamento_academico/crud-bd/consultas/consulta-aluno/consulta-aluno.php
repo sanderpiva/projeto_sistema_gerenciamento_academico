@@ -1,3 +1,21 @@
+<?php
+session_start();
+
+// Verifica se o usuário está logado e é professor
+if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true || $_SESSION['tipo_usuario'] !== 'professor') {
+    header("Location: ../../../index.php");
+    exit();
+}
+
+// Verifica se o logout foi solicitado
+if (isset($_GET['logout']) && $_GET['logout'] == 'true') {
+    session_unset();
+    session_destroy();
+    header("Location: ../../../index.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -47,7 +65,7 @@
                     FROM
                         aluno a
                     JOIN
-                        turma t ON a.Turma_id_turma  = t.id_turma
+                        turma t ON a.Turma_id_turma = t.id_turma
                 ");
                 $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -61,7 +79,7 @@
                     echo "<td>" . htmlspecialchars($aluno['endereco']) . "</td>";
                     echo "<td>" . htmlspecialchars($aluno['cidade']) . "</td>";
                     echo "<td>" . htmlspecialchars($aluno['telefone']) . "</td>";
-                    echo "<td>" . htmlspecialchars($aluno['nome_turma']) . "</td>"; // Exibe o nome da turma
+                    echo "<td>" . htmlspecialchars($aluno['nome_turma']) . "</td>";
                     echo "<td id='buttons-wrapper'>";
                     echo "<button onclick='atualizarAluno(\"" . htmlspecialchars($aluno['id_aluno']) . "\")'><i class='fa-solid fa-pen'></i> Atualizar</button>";
                     echo "<button onclick='excluirAluno(\"" . htmlspecialchars($aluno['id_aluno']) . "\")'><i class='fa-solid fa-trash'></i> Excluir</button>";
@@ -76,13 +94,13 @@
     </table>
 
     <br>
-    <a href="../../../servicos-professor/pagina-servicos-professor.php">Voltar aos Serviços</a>
+    <a href="../../../servicos-professor/pagina-servicos-professor.php">← Voltar aos Serviços</a>
+    <hr>
+    <a href="?logout=true" style="margin-left:20px;">Logout →</a>
 
     <script>
         function atualizarAluno(id_aluno) {
-            //window.location.href = "../../cadastros/cadastro-aluno/form-aluno.php?id_aluno=" + id_aluno;
             window.location.href = "../../../login/cadastro-aluno.php?id_aluno=" + encodeURIComponent(id_aluno);
-        
         }
 
         function excluirAluno(id_aluno) {
@@ -93,6 +111,7 @@
         }
     </script>
 </body>
+
 <footer>
     <p>Desenvolvido por Juliana e Sander</p>
 </footer>
