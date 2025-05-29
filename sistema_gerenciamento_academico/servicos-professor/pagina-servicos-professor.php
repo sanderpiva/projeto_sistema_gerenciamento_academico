@@ -14,6 +14,7 @@
             <section class="section">
                 <h2>CADASTROS</h2>
                 <div class="button-grid">
+                    <!--<button onclick="window.location.href='../crud-bd/cadastros/cadastro-aluno/form-aluno.php'">Cadastrar Aluno</button>-->
                     <button onclick="window.location.href='../crud-bd/cadastros/cadastro-turma/form-turma.php'">Cadastrar Turma</button>
                     <button onclick="window.location.href='../crud-bd/cadastros/cadastro-disciplina/form-disciplina.php'">Cadastrar Disciplina</button>
                     <button onclick="window.location.href='../crud-bd/cadastros/cadastro-matricula/form-matricula.php'">Cadastrar Matricula</button>
@@ -21,7 +22,6 @@
                     <button onclick="window.location.href='../crud-bd/cadastros/cadastro-prova/form-prova.php'">Cadastrar Prova</button>
                     <button onclick="window.location.href='../crud-bd/cadastros/cadastro-questoes-prova/form-questoes-prova.php'">Cadastrar Questoes de prova</button>
                     <button onclick="window.location.href='../crud-bd/cadastros/cadastro-respostas/form-respostas.php'">Cadastrar Respostas</button>
-                    <button onclick="window.location.href='../crud-bd/cadastros/cadastro-aluno/form-aluno.php'">Cadastrar Aluno</button>
                     <!--<button onclick="window.location.href='../crud-bd/cadastros/cadastro-professor/form-professor.php'">Cadastrar Professor</button>-->
                     
                 </div>
