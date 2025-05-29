@@ -1,6 +1,14 @@
 <?php
 require_once '../conexao.php';
 
+session_start(); // <--- ESSENCIAL: Inicia a sessão para acessar $_SESSION
+
+    if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true || $_SESSION['tipo_usuario'] !== 'professor') {
+        header("Location: ../../../index.php"); // Ou para uma página de login específica
+        exit();
+    }
+
+
 $isUpdating = false;
 $turmaData = [];
 $errors = "";
