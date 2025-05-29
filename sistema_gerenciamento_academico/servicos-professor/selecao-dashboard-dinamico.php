@@ -1,71 +1,125 @@
-<html>
+<?php
+session_start();
+
+// Verifica se o usuário está logado e se é um aluno
+if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true || $_SESSION['tipo_usuario'] !== 'aluno') {
+    header("Location: ../index.php"); 
+    exit();
+}
+
+// Verifica se o logout foi solicitado
+if (isset($_GET['logout']) && $_GET['logout'] == 'true') {
+    session_unset(); // Remove todas as variáveis de sessão
+    session_destroy(); // Destrói a sessão
+    
+    echo '<!DOCTYPE html>
+          <html>
+          <head>
+              <title>Saindo...</title>
+              <meta charset="utf-8">
+              <link rel="stylesheet" href="../css/style.css">
+          </head>
+          <body class="servicos_forms">
+              <div class="form_container">
+                  <p>Você foi desconectado com sucesso!</p>
+                  <p>Redirecionando para a HomePage...</p>
+              </div>
+              <script>
+                  setTimeout(function() {
+                      window.location.href = "../index.php";
+                  }, 3000); // Redireciona após 3 segundos (3000 milissegundos)
+              </script>
+          </body>
+          </html>';
+    exit(); // Garante que nenhum outro conteúdo da página seja renderizado
+}
+
+
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "gerenciamento_academico_completo";
+$pdo = null;
+$erro_conexao = null;
+$turmas = [];
+$disciplinas = [];
+
+try {
+    $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Carregar as turmas disponíveis
+    $stmt_turmas = $pdo->query("SELECT id_turma, nomeTurma FROM turma ORDER BY nomeTurma");
+    $turmas = $stmt_turmas->fetchAll(PDO::FETCH_ASSOC);
+
+    // Carregar as disciplinas disponíveis, incluindo o nome do professor
+    $stmt_disciplinas = $pdo->query("SELECT id_disciplina, nome, professor FROM disciplina ORDER BY nome");
+    $disciplinas = $stmt_disciplinas->fetchAll(PDO::FETCH_ASSOC);
+
+    // Processar o formulário quando submetido
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (isset($_POST['turma_selecionada']) && !empty($_POST['turma_selecionada']) &&
+            isset($_POST['disciplina_selecionada']) && !empty($_POST['disciplina_selecionada'])) {
+
+            $_SESSION['turma_selecionada'] = $_POST['turma_selecionada'];
+            $_SESSION['disciplina_selecionada'] = $_POST['disciplina_selecionada'];
+
+            header("Location: dashboard-alunos-dinamico.php"); // Redireciona para a página que exibe o conteúdo
+            exit();
+        } else {
+            echo "<p style='color:red;'>Por favor, selecione uma turma e uma disciplina.</p>";
+        }
+    }
+
+} catch (PDOException $e) {
+    $erro_conexao = "<p style='color:red;'>Erro na conexão com o banco de dados: " . htmlspecialchars($e->getMessage()) . "</p>";
+} finally {
+    $pdo = null;
+}
+?>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-    <?php
-    // Sempre inicie a sessão no topo de qualquer página PHP que a utilize
-    session_start();
-    ?>
-    <title>Atividades Dinamicas</title>
+    <title>Seleção de Atividades</title>
     <meta charset="utf-8">
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body class="servicos_forms">
-
-<?php
-    // Verifica se o formulário foi submetido via método POST
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-        // Verifica se 'turma' e 'disciplina' foram enviados e não estão vazios
-        if (isset($_POST['turma']) && !empty($_POST['turma']) &&
-            isset($_POST['disciplina']) && !empty($_POST['disciplina'])) {
-
-            // Atribui os valores postados a variáveis
-            $turma = $_POST['turma'];
-            $disciplina = $_POST['disciplina'];
-
-            // Armazena os valores na sessão
-            $_SESSION['turma_selecionada'] = $turma;
-            $_SESSION['disciplina_selecionada'] = $disciplina;
-
-            // Redireciona o usuário para a página de destino
-            // Certifique-se de que não há NENHUM output (echo, HTML, etc.) antes desta linha
-            header("Location: ../servicos-professor/dashboard-alunos-dinamico.php");
-
-            // Garante que o script pare de executar após o redirecionamento
-            exit();
-
-        } else {
-            // Mensagem de erro caso turma ou disciplina não tenham sido selecionadas/enviadas corretamente
-            echo "<p style='color:red;'>Por favor, selecione uma opção para turma e disciplina.</p>";
-        }
-    }
-?>
     <div class="form_container">
         <form class="form" method="post" action="">
+            <h2>Selecione a Turma e a Disciplina</h2>
 
-            <h2>Login Aluno</h2>
+            <?php if ($erro_conexao): ?>
+                <?php echo $erro_conexao; ?>
+            <?php else: ?>
+                <label for="turma_selecionada">Selecione a Turma:</label>
+                <select id="turma_selecionada" name="turma_selecionada" required>
+                    <option value="">Selecione a Turma</option>
+                    <?php foreach ($turmas as $turma): ?>
+                        <option value="<?= htmlspecialchars($turma['nomeTurma']) ?>">
+                            <?= htmlspecialchars($turma['nomeTurma']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select><br><br>
 
-            <select id="turma" name="turma" required> <option value="">Selecione serie/turma:</option>
-                <option value="6s">6 serie</option>
-                <option value="7s">7 serie</option>
-                <option value="8s">8 serie</option>
-                <option value="1aem">1 ano ensino medio</option>
-            </select><br><br>
+                <label for="disciplina_selecionada">Selecione a Disciplina:</label>
+                <select id="disciplina_selecionada" name="disciplina_selecionada" required>
+                    <option value="">Selecione a Disciplina</option>
+                    <?php foreach ($disciplinas as $disciplina): ?>
+                        <option value="<?= htmlspecialchars($disciplina['nome']) ?>">
+                            <?= htmlspecialchars($disciplina['nome']) ?> (Professor: <?= htmlspecialchars($disciplina['professor']) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select><br><br>
 
-            <select id="disciplina" name="disciplina" required> <option value="">Selecione disciplina:</option>
-                <option value="matematica">matematica</option>
-                <option value="portugues">portugues</option>
-                <option value="geografia">geografia</option>
-                <option value="historia">historia</option>
-            </select><br><br>
-
-            <button type="submit">Login</button>
+                <button type="submit">Continuar</button>
+            <?php endif; ?>
         </form>
-
     </div>
-    <a href="../index.php">Home Page</a>
+    <a href="?logout=true">Logout -> Home Page</a>
 </body>
 <footer>
     <p>Desenvolvido por Juliana e Sander</p>
 </footer>
-
 </html>

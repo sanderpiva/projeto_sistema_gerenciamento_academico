@@ -1,6 +1,14 @@
 <?php
 require_once '../conexao.php';
 
+session_start(); // <--- ESSENCIAL: Inicia a sessão para acessar $_SESSION
+
+    if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true || $_SESSION['tipo_usuario'] !== 'professor') {
+        header("Location: ../../../index.php"); // Ou para uma página de login específica
+        exit();
+    }
+
+
 $alunos = $conexao->query("SELECT id_aluno, matricula, nome FROM aluno")->fetchAll(PDO::FETCH_ASSOC);
 $disciplinas = $conexao->query("SELECT id_disciplina, nome, Professor_id_professor FROM disciplina")->fetchAll(PDO::FETCH_ASSOC);
 $professores = $conexao->query("SELECT id_professor, nome FROM professor")->fetchAll(PDO::FETCH_ASSOC);

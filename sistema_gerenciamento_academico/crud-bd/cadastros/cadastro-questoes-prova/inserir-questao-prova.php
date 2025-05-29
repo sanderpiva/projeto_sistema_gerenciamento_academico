@@ -2,6 +2,14 @@
 
 require_once '../conexao.php';
 
+session_start(); // <--- ESSENCIAL: Inicia a sessão para acessar $_SESSION
+
+    if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true || $_SESSION['tipo_usuario'] !== 'professor') {
+        header("Location: ../index.php"); // Ou para uma página de login específica
+        exit();
+    }
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $codigoQuestao = $_POST["codigoQuestaoProva"];
     $descricao_questao_prova = $_POST["descricao_questao"];
