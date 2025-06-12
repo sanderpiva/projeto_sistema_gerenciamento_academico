@@ -1,5 +1,24 @@
 
 
+<?php
+session_start();
+
+// Verifica se o usuário está logado e é professor
+if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true || $_SESSION['tipo_usuario'] !== 'professor') {
+    header("Location: ../../../index.php");
+    exit();
+}
+
+// Verifica se o logout foi solicitado
+if (isset($_GET['logout']) && $_GET['logout'] == 'true') {
+    session_unset();
+    session_destroy();
+    header("Location: ../../../index.php");
+    exit();
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -87,6 +106,8 @@
 
     <br>
     <a href="../../../servicos-professor/pagina-servicos-professor.php">Voltar aos Serviços</a>
+    <hr>
+    <a href="?logout=true" style="margin-left:20px;">Logout →</a>
 
     <script>
         function atualizarResposta(id_resposta) {
