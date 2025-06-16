@@ -1,3 +1,22 @@
+<?php
+session_start();
+
+// Verifica se o usuário está logado e é professor
+if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true || $_SESSION['tipo_usuario'] !== 'professor') {
+    header("Location: ../../../index.php");
+    exit();
+}
+
+// Verifica se o logout foi solicitado
+if (isset($_GET['logout']) && $_GET['logout'] == 'true') {
+    session_unset();
+    session_destroy();
+    header("Location: ../../../index.php");
+    exit();
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -12,11 +31,21 @@
 
     <h2>Consulta Matrícula</h2>
 
+    <?php
+        if (isset($_GET['message'])) {
+            echo "<p style='color:green;'>" . htmlspecialchars($_GET['message']) . "</p>";
+        }
+        if (isset($_GET['error'])) {
+            echo "<p style='color:red;'>" . htmlspecialchars($_GET['error']) . "</p>";
+        }
+    ?>
+
     <table border="1" cellpadding="5" cellspacing="0">
         <thead>
             <tr>
                 <th>Aluno</th>
                 <th>Disciplina</th>
+                <th>Código Turma</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -30,18 +59,22 @@
                         m.Aluno_id_aluno,
                         m.Disciplina_id_disciplina,
                         a.nome AS nome_aluno,
-                        d.nome AS nome_disciplina
+                        d.nome AS nome_disciplina,
+                        t.codigoTurma AS codigo_turma
                     FROM
                         matricula m
                     JOIN
                         aluno a ON m.Aluno_id_aluno = a.id_aluno
                     JOIN
                         disciplina d ON m.Disciplina_id_disciplina = d.id_disciplina
+                    JOIN
+                        turma t ON a.Turma_id_turma = t.id_turma
                 ");
                 $matriculas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 if (count($matriculas) > 0) {
                     foreach ($matriculas as $matricula) {
+                        $codigo_turma = htmlspecialchars($matricula['codigo_turma']);
                         $id_aluno = htmlspecialchars($matricula['Aluno_id_aluno']);
                         $id_disciplina = htmlspecialchars($matricula['Disciplina_id_disciplina']);
                         $nome_aluno = htmlspecialchars($matricula['nome_aluno']);
@@ -50,6 +83,7 @@
                         echo "<tr>";
                         echo "<td>$nome_aluno</td>";
                         echo "<td>$nome_disciplina</td>";
+                        echo "<td>$codigo_turma</td>";
                         echo "<td id='buttons-wrapper'>";
                         echo "<button onclick='atualizarMatricula(\"$id_aluno\", \"$id_disciplina\")'><i class='fa-solid fa-pen'></i> Atualizar</button>";
                         echo "<button onclick='exclusaoEmDesenvolvimento(\"$id_aluno\")'><i class='fa-solid fa-trash'></i> Excluir</button>";
@@ -57,10 +91,10 @@
                         echo "</tr>";
                     }
                 } else {
-                    echo "<tr><td colspan='3'>Nenhuma matrícula encontrada.</td></tr>";
+                    echo "<tr><td colspan='4'>Nenhuma matrícula encontrada.</td></tr>";
                 }
             } catch (PDOException $e) {
-                echo "<tr><td colspan='3'>Erro ao consultar matrículas: " . $e->getMessage() . "</td></tr>";
+                echo "<tr><td colspan='4'>Erro ao consultar matrículas: " . $e->getMessage() . "</td></tr>";
             }
             ?>
         </tbody>
@@ -68,6 +102,8 @@
 
     <br>
     <a href="../../../servicos-professor/pagina-servicos-professor.php">Voltar aos Serviços</a>
+    <hr>
+    <a href="?logout=true" style="margin-left:20px;">Logout →</a>
 
     <script>
         function atualizarMatricula(id_aluno, id_disciplina) {
